@@ -3,8 +3,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from api.user import router as user_router
 from api.film import router as film_router
 from core import tasks
-from core.dependencies import database
-from internal.repository import user_repository
 
 
 app = FastAPI()

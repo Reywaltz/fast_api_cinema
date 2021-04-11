@@ -1,7 +1,7 @@
-from databases import Database
+from asyncpg.connection import Connection 
 from pkg.logger import logger
 
 class BaseRepository:
-    def __init__(self, db: Database, logger: logger.Logger) -> None:
+    def __init__(self, db: Connection, logger: logger.Logger) -> None:
         self.db = db
         self.logger = logger

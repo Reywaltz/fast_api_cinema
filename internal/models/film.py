@@ -3,5 +3,12 @@ from typing import Optional
 
 class FilmBase(CoreModel, IDMixCoreModel):
     title: str
-    path: str
-    poster: Optional[str]
+    description: str
+    film_path: str
+    poster_path: Optional[str]
+
+class FilmCreate(CoreModel):
+    title: str
+    description: str
+    film_path: str
+    poster_path: Optional[str]

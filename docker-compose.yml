@@ -1,15 +1,5 @@
 version: '3.9'
 services:
-  backend:
-    build: .
-    command: 'uvicorn blog.main:app --host 0.0.0.0'
-    ports:
-      - 8000:8000
-    volumes:
-      - .:/app
-    depends_on:
-      - db
-
   db:
     image: postgres:latest
     restart: always
@@ -21,3 +11,24 @@ services:
        - /private/var/lib/postgresql:/var/lib/postgresql
     ports:
       - "5433:5432"
+    
+  # backend:
+  #   build: .
+  #   command: 'uvicorn main:app --host 0.0.0.0'
+  #   ports:
+  #     - 8000:8000
+  #   volumes:
+  #     - .:/app
+  #   depends_on:
+  #     - db
+
+  # rabbitMQ:
+  #     image: "rabbitmq:3-management"
+  #     hostname: "my-rabbit"
+  #     environment:
+  #       RABBITMQ_ERLANG_COOKIE: "SWQOKODSQALRPCLNMEQG"
+  #       RABBITMQ_DEFAULT_USER: "rabbitmq"
+  #       RABBITMQ_DEFAULT_PASS: "rabbitmq"
+  #     ports:
+  #       - "15672:15672"
+  #       - "5672:5672"  
