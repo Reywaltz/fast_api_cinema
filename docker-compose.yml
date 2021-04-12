@@ -12,15 +12,19 @@ services:
     ports:
       - "5433:5432"
     
-  # backend:
-  #   build: .
-  #   command: 'uvicorn main:app --host 0.0.0.0'
-  #   ports:
-  #     - 8000:8000
-  #   volumes:
-  #     - .:/app
-  #   depends_on:
-  #     - db
+  backend:
+    build: .
+    command: 'uvicorn main:app --host 0.0.0.0'
+    environment:
+      DB_URL: postgresql://cinema:password@db:5432/fast_api_cinema
+    ports:
+      - 8000:8000
+    volumes:
+      - .:/app
+    depends_on:
+      - db
+    links:
+      - "db:db"
 
   # rabbitMQ:
   #     image: "rabbitmq:3-management"

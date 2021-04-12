@@ -1,5 +1,8 @@
-from fastapi import FastAPI
+import os
+
 import asyncpg
+from fastapi import FastAPI
+
 
 def create_start_app_handler(app: FastAPI):
     async def start_app() -> None:
@@ -17,8 +20,7 @@ def create_stop_app_handler(app: FastAPI):
 
 async def connect_to_db(app: FastAPI) -> None:
     try:
-        database = await asyncpg.connect("postgresql://cinema:password@localhost:5433/fast_api_cinema")
-        print(database)
+        database = await asyncpg.connect(os.getenv("DB_URL"))
         app.state._db = database
     except Exception as e:
         print(e)

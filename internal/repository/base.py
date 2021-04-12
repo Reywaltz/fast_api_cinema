@@ -1,5 +1,6 @@
-from asyncpg.connection import Connection 
+from asyncpg.connection import Connection
 from pkg.logger import logger
+
 
 class BaseRepository:
     def __init__(self, db: Connection, logger: logger.Logger) -> None:
