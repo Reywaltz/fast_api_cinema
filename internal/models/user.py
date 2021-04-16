@@ -1,11 +1,14 @@
-from internal.models.core import CoreModel
+from datetime import datetime
+
+from internal.models.core import CoreModel, IDMixCoreModel
 
 
-class UserBase(CoreModel):
+class UserCreate(CoreModel):
     username: str
     password: str
     access_token: str
+    valid_to: datetime
 
 
-class UserCreate(UserBase):
+class UserBase(IDMixCoreModel, UserCreate):
     pass

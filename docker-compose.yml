@@ -11,10 +11,10 @@ services:
        - /private/var/lib/postgresql:/var/lib/postgresql
     ports:
       - "5433:5432"
-    
+
   backend:
     build: .
-    command: 'uvicorn main:app --host 0.0.0.0'
+    command: 'uvicorn main:app --host 0.0.0.0 --reload'
     environment:
       DB_URL: postgresql://cinema:password@db:5432/fast_api_cinema
     ports:
