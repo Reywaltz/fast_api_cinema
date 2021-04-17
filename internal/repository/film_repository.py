@@ -1,5 +1,5 @@
 from asyncpg.exceptions import UniqueViolationError
-from internal.models.film import FilmBase
+from internal.models.film import FilmBase, FilmCreate
 from internal.repository.base import BaseRepository
 
 base_fields = "title, description, film_path, poster_path"
@@ -13,18 +13,18 @@ class FilmRepository(BaseRepository):
     delete_query = "DELETE FROM film WHERE id=$1 RETURNING id"
     update_query = "UPDATE film SET title=$1, description=$2, film_path=$3, poster_path=$4 WHERE id=$5" # noqa
 
-    async def get(self):
+    async def get(self) -> list[FilmBase]:
         film_list = await self.db.fetch(self.select_query)
         return film_list
 
-    async def get_one(self, id: int):
+    async def get_one(self, id: int) -> FilmBase:
         pr_statement = await self.db.prepare(self.select_one_query)
         film = await pr_statement.fetchrow(id)
         if film is None:
             return
         return FilmBase(**film)
 
-    async def create(self, new_film: FilmBase):
+    async def create(self, new_film: FilmCreate):
         try:
             pr_statement = await self.db.prepare(self.create_query)
             await pr_statement.fetch(

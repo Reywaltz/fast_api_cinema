@@ -3,7 +3,9 @@ from internal.repository.base import BaseRepository
 
 
 class UserRepository(BaseRepository):
+    select_all_query = "SELECT * FROM users ORDER BY id"
     select_by_username_query = "SELECT * FROM users where username=$1"
+    select_by_token_query = "SELECT * FROM users where access_token=$1"
     insert_query = "INSERT INTO users (username, password, access_token, valid_to)\
                     values ($1, $2, $3, $4)"
     update_token_query = "UPDATE users SET access_token=$1, valid_to=$2\
@@ -11,6 +13,16 @@ class UserRepository(BaseRepository):
 
     async def get_one(self, username: str) -> UserBase:
         user = await self.db.fetchrow(self.select_by_username_query, username)
+        if user is not None:
+            return UserBase(**user)
+        return None
+
+    async def get_all(self) -> list[UserBase]:
+        user_list = await self.db.fetch(self.select_all_query)
+        return user_list
+
+    async def get_by_token(self, token: str) -> UserBase:
+        user = await self.db.fetchrow(self.select_by_token_query, token)
         if user is not None:
             return UserBase(**user)
         return None
