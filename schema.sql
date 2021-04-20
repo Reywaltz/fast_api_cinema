@@ -1,15 +1,61 @@
+CREATE TABLE IF NOT EXISTS actor (
+    id SERIAL PRIMARY KEY,
+    name TEXT UNIQUE
+);
+
+CREATE TABLE IF NOT EXISTS genre (
+    id SERIAL PRIMARY KEY,
+    name TEXT UNIQUE
+);
+
+CREATE TABLE IF NOT EXISTS director (
+    id SERIAL PRIMARY KEY,
+    name TEXT UNIQUE
+);
+
+CREATE TABLE IF NOT EXISTS country (
+    id SERIAL PRIMARY KEY,
+    name TEXT UNIQUE
+);
+
+CREATE TABLE IF NOT EXISTS award (
+    id SERIAL PRIMARY KEY,
+    name TEXT UNIQUE
+);
+
 CREATE TABLE IF NOT EXISTS film (
     id SERIAL PRIMARY KEY,
     title TEXT UNIQUE,
-    description TEXT,
-    film_path TEXT,
-    poster_path TEXT
+    year TEXT,
+    length TEXT,
+    score FLOAT,
+    poster TEXT,
+    frame text[10],
+    plot TEXT,
+    video TEXT
 );
 
-CREATE TABLE IF NOT EXISTS users (
-    id SERIAL PRIMARY KEY,
-    username TEXT UNIQUE,
-    password TEXT,
-    access_token TEXT,
-    valid_to TIMESTAMP WITH TIME ZONE
-)
+CREATE TABLE IF NOT EXISTS film_award(
+    film_id SERIAL REFERENCES film(id) ON DELETE CASCADE,
+    award_id SERIAL REFERENCES award(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS film_genre(
+    film_id SERIAL REFERENCES film(id) ON DELETE CASCADE,
+    genre_id SERIAL REFERENCES genre(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS film_country(
+    film_id SERIAL REFERENCES film(id) ON DELETE CASCADE,
+    country_id SERIAL REFERENCES genre(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS film_director(
+    film_id SERIAL REFERENCES film(id) ON DELETE CASCADE,
+    director_id SERIAL REFERENCES genre(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS film_actor(
+    film_id SERIAL REFERENCES film(id) ON DELETE CASCADE,
+    actor_id SERIAL REFERENCES genre(id) ON DELETE CASCADE
+);

@@ -20,7 +20,7 @@ def create_stop_app_handler(app: FastAPI):
 
 async def connect_to_db(app: FastAPI) -> None:
     try:
-        database = await asyncpg.connect(os.getenv("DB_URL"))
+        database = await asyncpg.connect(os.getenv("DATABASE_URL"))
         app.state._db = database
     except Exception as e:
         print(e)

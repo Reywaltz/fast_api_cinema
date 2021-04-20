@@ -4,3 +4,6 @@ img
 logs
 .vscode
 __pycache__
+test.py
+*.dbm
+temp_2.sql

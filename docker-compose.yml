@@ -16,7 +16,7 @@ services:
     build: .
     command: 'uvicorn main:app --host 0.0.0.0 --reload'
     environment:
-      DB_URL: postgresql://cinema:password@db:5432/fast_api_cinema
+      DATABASE_URL: postgresql://cinema:password@db:5432/fast_api_cinema
     ports:
       - 8000:8000
     volumes:
