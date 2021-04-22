@@ -7,3 +7,4 @@ __pycache__
 test.py
 *.dbm
 temp_2.sql
+*.mp4
