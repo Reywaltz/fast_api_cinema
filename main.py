@@ -16,8 +16,8 @@ app.add_middleware(
 
 )
 
-app.add_event_handler("startup", tasks.create_start_app_handler(app))
-app.add_event_handler("shutdown", tasks.create_stop_app_handler(app))
+# app.add_event_handler("startup", tasks.create_start_app_handler(app))
+# app.add_event_handler("shutdown", tasks.create_stop_app_handler(app))
 
 
 app.include_router(film_router, prefix="/api")

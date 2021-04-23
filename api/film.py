@@ -1,7 +1,11 @@
+import aiofiles
+from aiofiles.base import AiofilesContextManager
 from asyncpg.exceptions import UniqueViolationError
 from core.dependencies.database import get_repository
 from pathlib import Path
 from pprint import pprint
+from fastapi.templating import Jinja2Templates
+from fastapi.staticfiles import StaticFiles 
 from fastapi import APIRouter, Depends, status, Request
 from fastapi.security import OAuth2PasswordBearer
 from internal.models.film import FilmBase, FilmCreate, FilmJoined
@@ -10,13 +14,17 @@ from fastapi.responses import JSONResponse, StreamingResponse
 
 router = APIRouter(prefix="/films", tags=['films'])
 
+router.mount('', 'front', 'front')
+templates = Jinja2Templates(directory='front')
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/users", auto_error=True)
 
 
 @router.get("", response_model=list[FilmJoined])
-async def film_list(film_repo: FilmRepository = Depends(get_repository(FilmRepository))) -> list[FilmBase]: # noqa
-    film_list = await film_repo.get()
-    return film_list
+async def film_list(request: Request): # noqa
+    return templates.TemplateResponse('index.html', {"request": request})
+    
+    # film_list = await film_repo.get()
+    # return film_list
 
 
 # @router.get("/{id}",
@@ -102,7 +110,7 @@ def ranged(
 
 
 async def open_file(request: Request) -> tuple:
-    path = Path('video.mp4')
+    path = Path('test/videoplayback.mp4')
     file = path.open('rb')
     file_size = path.stat().st_size
     chunk = 10 ** 6
@@ -132,25 +140,69 @@ async def open_file(request: Request) -> tuple:
         range_start = content_range.split('=')[-1].split('-')[0]
         range_end = min(int(range_start) + chunk, file_size - 1)
 
-        # print(content_range, range_start, range_end)
+        print(range_start, range_end)
 
     return file, status_code, content_length, headers
 
 
-@router.get("/fake")
-async def fake(request: Request) -> StreamingResponse:
-    file, status_code, content_length, headers = await open_file(request)
+# @router.get("/fake")
+# async def fake(request: Request) -> StreamingResponse:
+#     file, status_code, content_length, headers = await open_file(request)
 
-    response = StreamingResponse(
-        file,
-        media_type='video/mp4',
-        status_code=status_code
+#     response = StreamingResponse(
+#         file,
+#         media_type='video/mp4',
+#         status_code=status_code
+#     )
+
+#     response.headers.update({
+#         'Accept-Ranges': 'bytes',
+#         'Content-Length': str(content_length),
+#         **headers
+#     })
+    # print(file, status_code, content_length, headers)
+    # return response
+
+@router.get("/fake")
+async def fake(request: Request):
+    # TODO проверка на конечный чанк при загрузке, чтобы он не выходил за пределы Content Length и Content-Range
+    range_header = request.headers.get('range', None)
+    # print(request.headers.get('range'))
+    if not range_header:
+        return JSONResponse("bad q", 400)
+    
+    chunk_size = 10 ** 5
+    file = Path("test/video.mp4")
+    file_size = file.stat().st_size
+    print(file_size)
+    start = max(0, int(range_header.strip().split('=')[-1].split('-')[0]))
+    end = range_header.strip().split('=')[-1].split('-')[-1]
+    
+    if end == '':
+        end = start + chunk_size
+
+    end = min(int(end), file_size - 1)
+    content_length = end - start
+    print(start, end, content_length)
+    headers = {
+        "Accept-Range": 'bytes',
+        'Content-Range': f'bytes {start}-{end}/{file_size}',
+        'Content-Length': f"{content_length}",
+        'Content-Type': 'video/mp4'
+    }
+
+    file = read_chunk('test/video.mp4', start, end, chunk_size)
+
+    return StreamingResponse(file,
+        status_code=206,
+        headers=headers,
+        media_type='video/mp4'
     )
 
-    response.headers.update({
-        'Accept-Ranges': 'bytes',
-        'Content-Length': str(content_length),
-        **headers
-    })
-    # print(file, status_code, content_length, headers)
-    return response
+def read_chunk(file_name: str, start_positon: int, end_position: int, chunk: int):
+    file_size = Path(file_name).stat().st_size
+    print(file_name)
+    with open(file_name, 'rb') as file:
+        file.seek(start_positon)
+        data = file.read(chunk)
+        yield data
