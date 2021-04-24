@@ -165,25 +165,19 @@ async def open_file(request: Request) -> tuple:
 
 @router.get("/fake")
 async def fake(request: Request):
-    # TODO проверка на конечный чанк при загрузке, чтобы он не выходил за пределы Content Length и Content-Range
     range_header = request.headers.get('range', None)
-    # print(request.headers.get('range'))
     if not range_header:
         return JSONResponse("bad q", 400)
-    
-    chunk_size = 10 ** 5
+    chunk_size = 10 ** 6
     file = Path("test/video.mp4")
     file_size = file.stat().st_size
-    print(file_size)
     start = max(0, int(range_header.strip().split('=')[-1].split('-')[0]))
-    end = range_header.strip().split('=')[-1].split('-')[-1]
-    
-    if end == '':
-        end = start + chunk_size
 
-    end = min(int(end), file_size - 1)
-    content_length = end - start
-    print(start, end, content_length)
+    end = min(start + chunk_size, file_size - 1)
+    content_length = end + 1 - start
+
+    file = read_chunk('test/video.mp4', start, content_length)
+
     headers = {
         "Accept-Range": 'bytes',
         'Content-Range': f'bytes {start}-{end}/{file_size}',
@@ -191,18 +185,16 @@ async def fake(request: Request):
         'Content-Type': 'video/mp4'
     }
 
-    file = read_chunk('test/video.mp4', start, end, chunk_size)
-
-    return StreamingResponse(file,
+    return StreamingResponse(
+        file,
         status_code=206,
         headers=headers,
         media_type='video/mp4'
     )
 
-def read_chunk(file_name: str, start_positon: int, end_position: int, chunk: int):
-    file_size = Path(file_name).stat().st_size
-    print(file_name)
+
+def read_chunk(file_name: str, start: int, length: int):
     with open(file_name, 'rb') as file:
-        file.seek(start_positon)
-        data = file.read(chunk)
+        file.seek(start)
+        data = file.read(length)
         yield data
